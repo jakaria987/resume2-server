@@ -28,6 +28,21 @@ async function run() {
     const db = client.db("toyShop");
     const toysCollection = db.collection("toys");
 
+    const indexKeys = {Name: 1};
+    const indexOptions = {name: "toyName"};
+
+    const result = await toysCollection.createIndex(indexKeys, indexOptions);
+
+    app.get('/toySearch/:text', async(req, res) => {
+      const searchText = req.params.text;
+      const result = await toysCollection.find({
+        $or: [
+          {Name : {$regex: searchText, $options: "i"}},
+        ],
+      }).toArray();
+      res.send(result)
+    })
+
     app.post('/postToys', async(req, res) => {
         const body = req.body;
         // if(!body){
@@ -45,18 +60,13 @@ async function run() {
     app.get('/allToys/:id', async(req, res) => {
         const id = req.params.id;
         const query = {_id : new ObjectId(id)};
-
-        // const options = {
-        //     // sort matched documents in descending order by rating
-        //     // sort: { "imdb.rating": -1 },
-        //     // Include only the `title` and `imdb` fields in the returned document
-        //     projection: { _id: 0, title: 1, imdb: 1 },
-        //   };
-
         const result = await toysCollection.findOne(query);
         res.send(result)
+    })
 
-
+    app.get('/myToys/:seller_email', async(req, res)=> {
+      const result = await toysCollection.find({seller_email: req.params.seller_email}).toArray();
+      res.send(result);
     })
 
 
