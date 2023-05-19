@@ -37,10 +37,22 @@ async function run() {
       const searchText = req.params.text;
       const result = await toysCollection.find({
         $or: [
-          {Name : {$regex: searchText, $options: "i"}},
+          {Name : {$regex:'\\b' + searchText + '\\b', $options: "i"}},
         ],
       }).toArray();
       res.send(result)
+    })
+
+    app.put('/myToys/:id', async(req, res) => {
+      const updatedToy = req.body;
+      console.log(updatedToy);
+    })
+
+    app.delete('/myToys/:id' , async(req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await toysCollection.deleteOne(query);
+      res.send(result);
     })
 
     app.post('/postToys', async(req, res) => {
