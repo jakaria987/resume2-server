@@ -43,9 +43,19 @@ async function run() {
       res.send(result)
     })
 
-    app.put('/myToys/:id', async(req, res) => {
+    app.patch('/myToys/:id', async(req, res) => {
+      const id = req.params.id;
+      const filter = {_id : new ObjectId(id)}
       const updatedToy = req.body;
       console.log(updatedToy);
+
+      const updateDoc = {
+        $set: {
+          status: updatedToy.status
+        },
+      };
+      const result = await toysCollection.updateOne(filter, updateDoc);
+      res.send(result);
     })
 
     app.delete('/myToys/:id' , async(req, res) => {
@@ -54,6 +64,13 @@ async function run() {
       const result = await toysCollection.deleteOne(query);
       res.send(result);
     })
+
+  //      app.get('/myToys/:id', async(req, res) => {
+  //     const id = req.params.id;
+  //     const query = {_id : new ObjectId(id)};
+  //     const result = await toysCollection.findOne(query);
+  //     res.send(result)
+  // })
 
     app.post('/postToys', async(req, res) => {
         const body = req.body;
@@ -64,11 +81,21 @@ async function run() {
         res.send(result)
         console.log(result);
     })
+    
     app.get('/allToys', async(req, res) => {
         const result = await toysCollection.find().toArray();
         res.send(result);
-
     })
+
+    app.get('/allToys/:text', async(req, res) => {
+      if(req.params.text == "ScienceToys" || req.params.text == "MathToys" || req.params.text == "EngineeringKits"){
+        const result = await toysCollection.find({sub_category: req.params.text}).toArray();
+        return res.send(result);
+      }
+        const result = await toysCollection.find().toArray();
+        res.send(result);
+    })
+
     app.get('/allToys/:id', async(req, res) => {
         const id = req.params.id;
         const query = {_id : new ObjectId(id)};
